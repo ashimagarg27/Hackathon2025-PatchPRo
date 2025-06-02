@@ -12,6 +12,11 @@ type Issue struct {
 	Title       string    `json:"title"`
 	HTMLURL     string    `json:"html_url"`
 	PullRequest *struct{} `json:"pull_request,omitempty"`
+	Labels      []Label   `json:"labels"`
+}
+
+type Label struct {
+	Name string `json:"name"`
 }
 
 func GetIssuesWithLabel(owner, repo, label, token string) ([]Issue, error) {

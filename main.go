@@ -26,9 +26,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error fetching compliance issues: %v", err)
 	}
-	fmt.Printf("Number of compliance Issues with %s label: %v \n\n", StorageLabel, len(complianceIssues))
+	fmt.Printf("Number of compliance Issues with label `%s`: %v \n\n", StorageLabel, len(complianceIssues))
 
-	// for _, issue := range complianceIssues {
-	// 	fmt.Printf("#%d: %s\nURL: %s\n\n", issue.Number, issue.Title, issue.HTMLURL)
-	// }
+	noOfDueIssues := 0
+	for _, issue := range complianceIssues {
+		if ok, _ := isIssueDueWithin3Weeks(issue.Labels); ok {
+			// fmt.Printf("📌 #%d: %s\nDue: %s\nURL: %s\n\n", issue.Number, issue.Title, due, issue.HTMLURL)
+			noOfDueIssues++
+		}
+	}
+	fmt.Printf("Number of compliance Issues with due date within 3 weeks : %v \n\n", noOfDueIssues)
 }
