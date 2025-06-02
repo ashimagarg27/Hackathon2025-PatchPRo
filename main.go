@@ -21,6 +21,12 @@ func main() {
 		log.Fatal("GITHUB_TOKEN not set")
 	}
 
+	// Load image-to-repo map from JSON
+	imageReoMap, err := loadImageRepoMap(JsonFileName)
+	if err != nil {
+		panic(err)
+	}
+
 	// Scan compliance repo to fetch issues with storage label
 	complianceIssues, err := GetIssuesWithLabel(ComplianceRepoOwner, ComplianceRepoName, StorageLabel, token)
 	if err != nil {
@@ -29,11 +35,16 @@ func main() {
 	fmt.Printf("Number of compliance Issues with label `%s`: %v \n\n", StorageLabel, len(complianceIssues))
 
 	noOfDueIssues := 0
+	var requiredIssues []Issue
 	for _, issue := range complianceIssues {
 		if ok, _ := isIssueDueWithin3Weeks(issue.Labels); ok {
-			// fmt.Printf("📌 #%d: %s\nDue: %s\nURL: %s\n\n", issue.Number, issue.Title, due, issue.HTMLURL)
+			image := extractImageNameFromIssueTitle(issue.Title)
+			if _, exists := imageReoMap[image]; exists {
+				requiredIssues = append(requiredIssues, issue)
+			}
 			noOfDueIssues++
 		}
 	}
 	fmt.Printf("Number of compliance Issues with due date within 3 weeks : %v \n\n", noOfDueIssues)
+	fmt.Printf("Number of required compliance Issues need to be fixed : %v \n\n", len(requiredIssues))
 }

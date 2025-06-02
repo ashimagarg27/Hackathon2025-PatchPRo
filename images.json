@@ -1,0 +1,10 @@
+{
+  "ibm/ibmcloud-object-storage-plugin": "https://github.com/IBM/ibmcloud-object-storage-plugin/tree/master",
+  "ibm/ibmcloud-object-storage-driver": "https://github.com/IBM/ibmcloud-object-storage-plugin/tree/master",
+  "ibm/ibm-object-csi-driver-operator": "https://github.com/IBM/ibm-object-csi-driver-operator",
+  "ibm/ibm-object-csi-driver": "https://github.com/IBM/ibm-object-csi-driver",
+  "ibm/ibm-storage-operator": "https://github.ibm.com/alchemy-containers/armada-storage-operator",
+  "armada-master/storage-file-plugin": "https://github.ibm.com/alchemy-containers/armada-storage-file-plugin",
+  "ibm/ibm-vpc-file-csi-driver": "https://github.com/IBM/ibm-vpc-file-csi-driver",
+  "armada-master/ibm-vpc-block-csi-driver": "https://github.com/kubernetes-sigs/ibm-vpc-block-csi-driver"
+}
