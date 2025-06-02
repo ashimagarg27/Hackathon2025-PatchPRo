@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"os"
 	"strings"
 	"time"
 )
@@ -19,4 +21,25 @@ func isIssueDueWithin3Weeks(labels []Label) (bool, string) {
 		}
 	}
 	return false, ""
+}
+
+func loadImageRepoMap(filename string) (map[string]string, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var imageRepoMap map[string]string
+	err = json.NewDecoder(file).Decode(&imageRepoMap)
+	return imageRepoMap, err
+}
+
+func extractImageNameFromIssueTitle(title string) string {
+	// Format: vulnerable image: Image:Version (Cruisers)
+	parts := strings.Split(title, ":")
+	if len(parts) >= 2 {
+		return strings.TrimSpace(parts[1])
+	}
+	return ""
 }
