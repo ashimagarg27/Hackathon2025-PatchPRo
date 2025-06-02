@@ -35,5 +35,5 @@ func main() {
 			noOfDueIssues++
 		}
 	}
-	fmt.Printf("Number of compliance Issues with due datw within 3 weeks : %v \n\n", noOfDueIssues)
+	fmt.Printf("Number of compliance Issues with due date within 3 weeks : %v \n\n", noOfDueIssues)
 }
