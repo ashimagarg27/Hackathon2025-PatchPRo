@@ -34,17 +34,9 @@ func main() {
 	}
 	fmt.Printf("Number of compliance Issues with label `%s`: %v \n\n", StorageLabel, len(complianceIssues))
 
-	noOfDueIssues := 0
-	var requiredIssues []Issue
-	for _, issue := range complianceIssues {
-		if ok, _ := isIssueDueWithin3Weeks(issue.Labels); ok {
-			image := extractImageNameFromIssueTitle(issue.Title)
-			if _, exists := imageReoMap[image]; exists {
-				requiredIssues = append(requiredIssues, issue)
-			}
-			noOfDueIssues++
-		}
-	}
-	fmt.Printf("Number of compliance Issues with due date within 3 weeks : %v \n\n", noOfDueIssues)
-	fmt.Printf("Number of required compliance Issues need to be fixed : %v \n\n", len(requiredIssues))
+	vulnImageCVEDataMap := getImageCVEReport(complianceIssues, imageReoMap, token)
+	report := formatCVEsAsReadableString(vulnImageCVEDataMap)
+	fmt.Print(report)
+
+	SendSlackAlert(report)
 }
