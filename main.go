@@ -35,18 +35,8 @@ func main() {
 	fmt.Printf("Number of compliance Issues with label `%s`: %v \n\n", StorageLabel, len(complianceIssues))
 
 	vulnImageCVEDataMap := getImageCVEReport(complianceIssues, imageReoMap, token)
+	report := formatCVEsAsReadableString(vulnImageCVEDataMap)
+	fmt.Print(report)
 
-	for image, cveData := range vulnImageCVEDataMap {
-		fmt.Println("Vuln Image: ", image)
-		fmt.Println("CVE Details: ")
-
-		for _, cve := range cveData {
-			fmt.Println("   ", "CVE ID: ", cve.CVEID)
-			fmt.Println("   ", "Package: ", cve.Package)
-			fmt.Println("   ", "Remediation: ", cve.Remediation)
-			fmt.Println()
-		}
-	}
-
-	SendSlackAlert(formatCVEsAsReadableString(vulnImageCVEDataMap))
+	SendSlackAlert(report)
 }
