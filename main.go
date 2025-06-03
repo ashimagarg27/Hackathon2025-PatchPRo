@@ -38,5 +38,10 @@ func main() {
 	report := formatCVEsAsReadableString(vulnImageCVEDataMap)
 	fmt.Print(report)
 
+	err = saveMapToJSONFile(vulnImageCVEDataMap, "cve_details.json")
+	if err != nil {
+		fmt.Println("Failed to save JSON:", err)
+	}
+
 	SendSlackAlert(report)
 }
