@@ -1,66 +1,144 @@
 {
   "armada-master/ibm-vpc-block-csi-driver": [
     {
-      "CVEID": "CVE-2024-9042",
-      "Package": "k8s.io/kubernetes",
-      "Remediation": "Upgrade k8s.io/kubernetes to >= 1.29.13, 1.30.9, 1.31.5, 1.32.1"
+      "cve_id": "CVE-2024-9042",
+      "due_date": "2025-08-22",
+      "package": "k8s.io/kubernetes",
+      "remediation": "Upgrade k8s.io/kubernetes to >= 1.29.13, 1.30.9, 1.31.5, 1.32.1"
     },
     {
-      "CVEID": "CVE-2025-0426",
-      "Package": "k8s.io/kubernetes",
-      "Remediation": "Upgrade k8s.io/kubernetes to >= 1.29.14, 1.30.10, 1.31.6, 1.32.2"
+      "cve_id": "CVE-2025-0426",
+      "due_date": "2025-08-22",
+      "package": "k8s.io/kubernetes",
+      "remediation": "Upgrade k8s.io/kubernetes to >= 1.29.14, 1.30.10, 1.31.6, 1.32.2"
     },
     {
-      "CVEID": "CVE-2025-22872",
-      "Package": "golang.org/x/net/html",
-      "Remediation": "Upgrade golang.org/x/net/html to >= 0.38.0"
+      "cve_id": "CVE-2025-22872",
+      "due_date": "2025-08-22",
+      "package": "golang.org/x/net/html",
+      "remediation": "Upgrade golang.org/x/net/html to >= 0.38.0"
     },
     {
-      "CVEID": "CVE-2025-30204",
-      "Package": "github.com/golang-jwt/jwt/v4",
-      "Remediation": "Upgrade github.com/golang-jwt/jwt/v4 to >= 4.5.2"
+      "cve_id": "CVE-2025-30204",
+      "due_date": "2025-08-22",
+      "package": "github.com/golang-jwt/jwt/v4",
+      "remediation": "Upgrade github.com/golang-jwt/jwt/v4 to >= 4.5.2"
     }
   ],
   "ibm/ibm-vpc-file-csi-driver": [
     {
-      "CVEID": "CVE-2025-0426",
-      "Package": "k8s.io/kubernetes",
-      "Remediation": "Upgrade k8s.io/kubernetes to >= 1.29.14, 1.30.10, 1.31.6, 1.32.2"
+      "cve_id": "CVE-2025-24528",
+      "due_date": "2025-03-30",
+      "package": "krb5-libs",
+      "remediation": "Upgrade krb5-libs to >= 0:1.18.2-31.el8_10"
     },
     {
-      "CVEID": "CVE-2025-24528",
-      "Package": "krb5-libs",
-      "Remediation": "Upgrade krb5-libs to >= 0:1.18.2-31.el8_10"
+      "cve_id": "CVE-2025-24528",
+      "due_date": "2025-05-14",
+      "package": "krb5-libs",
+      "remediation": "Upgrade krb5-libs to >= 0:1.18.2-31.el8_10"
     },
     {
-      "CVEID": "CVE-2024-9042",
-      "Package": "k8s.io/kubernetes",
-      "Remediation": "Upgrade k8s.io/kubernetes to >= 1.29.13, 1.30.9, 1.31.5, 1.32.1"
+      "cve_id": "CVE-2024-9042",
+      "due_date": "2025-05-10",
+      "package": "k8s.io/kubernetes",
+      "remediation": "Upgrade k8s.io/kubernetes to >= 1.29.13, 1.30.9, 1.31.5, 1.32.1"
     },
     {
-      "CVEID": "CVE-2025-30204",
-      "Package": "github.com/golang-jwt/jwt/v4",
-      "Remediation": "Upgrade github.com/golang-jwt/jwt/v4 to >= 4.5.2"
+      "cve_id": "CVE-2025-0426",
+      "due_date": "2025-05-10",
+      "package": "k8s.io/kubernetes",
+      "remediation": "Upgrade k8s.io/kubernetes to >= 1.29.14, 1.30.10, 1.31.6, 1.32.2"
     },
     {
-      "CVEID": "CVE-2025-22871",
-      "Package": "net/http/internal",
-      "Remediation": "Upgrade net/http/internal to >= 1.23.8, 1.24.2"
+      "cve_id": "CVE-2025-30204",
+      "due_date": "2025-04-10",
+      "package": "github.com/golang-jwt/jwt/v4",
+      "remediation": "Upgrade github.com/golang-jwt/jwt/v4 to >= 4.5.2"
     },
     {
-      "CVEID": "CVE-2025-0395",
-      "Package": "glibc",
-      "Remediation": "Upgrade glibc to >= 0:2.28-251.el8_10.16"
+      "cve_id": "CVE-2025-30204",
+      "due_date": "2025-04-17",
+      "package": "github.com/golang-jwt/jwt/v4",
+      "remediation": "Upgrade github.com/golang-jwt/jwt/v4 to >= 4.5.2"
     },
     {
-      "CVEID": "CVE-2025-22872",
-      "Package": "golang.org/x/net/html",
-      "Remediation": "Upgrade golang.org/x/net/html to >= 0.38.0"
+      "cve_id": "CVE-2024-9042",
+      "due_date": "2025-08-22",
+      "package": "k8s.io/kubernetes",
+      "remediation": "Upgrade k8s.io/kubernetes to >= 1.29.13, 1.30.9, 1.31.5, 1.32.1"
     },
     {
-      "CVEID": "CVE-2025-3576",
-      "Package": "krb5-libs",
-      "Remediation": "Upgrade krb5-libs to >= 0:1.18.2-32.el8_10"
+      "cve_id": "CVE-2025-0426",
+      "due_date": "2025-08-22",
+      "package": "k8s.io/kubernetes",
+      "remediation": "Upgrade k8s.io/kubernetes to >= 1.29.14, 1.30.10, 1.31.6, 1.32.2"
+    },
+    {
+      "cve_id": "CVE-2025-22871",
+      "due_date": "2025-05-25",
+      "package": "net/http/internal",
+      "remediation": "Upgrade net/http/internal to >= 1.23.8, 1.24.2"
+    },
+    {
+      "cve_id": "CVE-2025-24528",
+      "due_date": "2025-08-22",
+      "package": "krb5-libs",
+      "remediation": "Upgrade krb5-libs to >= 0:1.18.2-31.el8_10"
+    },
+    {
+      "cve_id": "CVE-2025-0395",
+      "due_date": "2025-04-30",
+      "package": "glibc",
+      "remediation": "Upgrade glibc to >= 0:2.28-251.el8_10.16"
+    },
+    {
+      "cve_id": "CVE-2025-22872",
+      "due_date": "2025-05-09",
+      "package": "golang.org/x/net/html",
+      "remediation": "Upgrade golang.org/x/net/html to >= 0.38.0"
+    },
+    {
+      "cve_id": "CVE-2025-0395",
+      "due_date": "2025-08-22",
+      "package": "glibc",
+      "remediation": "Upgrade glibc to >= 0:2.28-251.el8_10.16"
+    },
+    {
+      "cve_id": "CVE-2025-22871",
+      "due_date": "2025-08-22",
+      "package": "net/http/internal",
+      "remediation": "Upgrade net/http/internal to >= 1.23.8, 1.24.2"
+    },
+    {
+      "cve_id": "CVE-2025-22872",
+      "due_date": "2025-08-22",
+      "package": "golang.org/x/net/html",
+      "remediation": "Upgrade golang.org/x/net/html to >= 0.38.0"
+    },
+    {
+      "cve_id": "CVE-2025-30204",
+      "due_date": "2025-08-22",
+      "package": "github.com/golang-jwt/jwt/v4",
+      "remediation": "Upgrade github.com/golang-jwt/jwt/v4 to >= 4.5.2"
+    },
+    {
+      "cve_id": "CVE-2025-0395",
+      "due_date": "2025-10-17",
+      "package": "glibc",
+      "remediation": "Upgrade glibc to >= 0:2.28-251.el8_10.16"
+    },
+    {
+      "cve_id": "CVE-2025-24528",
+      "due_date": "2025-10-17",
+      "package": "krb5-libs",
+      "remediation": "Upgrade krb5-libs to >= 0:1.18.2-31.el8_10"
+    },
+    {
+      "cve_id": "CVE-2025-3576",
+      "due_date": "2025-07-18",
+      "package": "krb5-libs",
+      "remediation": "Upgrade krb5-libs to >= 0:1.18.2-32.el8_10"
     }
   ]
 }

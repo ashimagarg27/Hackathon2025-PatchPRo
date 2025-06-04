@@ -10,9 +10,10 @@ import (
 )
 
 type CVEDetails struct {
-	CVEID       string
-	Package     string
-	Remediation string
+	CVEID       string `json:"cve_id"`
+	DueDate     string `json:"due_date"` // Format: YYYY-MM-DD
+	Package     string `json:"package"`
+	Remediation string `json:"remediation"`
 }
 
 func isIssueDueWithin3Weeks(labels []Label) (bool, string) {
@@ -59,14 +60,15 @@ func clean(s string) string {
 func extractCVEsFromIssueComments(comment string) []CVEDetails {
 	var cves []CVEDetails
 
-	cveRegex := regexp.MustCompile(`(?s)(CVE-\d{4}-\d+).*?Vulnerable package:\s*([^\n]+).*?Corrective action:\s*([^\n]+)`)
+	cveRegex := regexp.MustCompile(`(?s)(CVE-\d{4}-\d+).*?Due:?[_\s]*:?[_\s]*(\d{4}-\d{2}-\d{2}).*?Vulnerable package:\s*([^\n]+).*?Corrective action:\s*([^\n]+)`)
 	matches := cveRegex.FindAllStringSubmatch(comment, -1)
 
 	for _, match := range matches {
 		cves = append(cves, CVEDetails{
 			CVEID:       clean(match[1]),
-			Package:     clean(match[2]),
-			Remediation: clean(match[3]),
+			DueDate:     clean(match[2]),
+			Package:     clean(match[3]),
+			Remediation: clean(match[4]),
 		})
 	}
 
@@ -102,12 +104,12 @@ func getImageCVEReport(issues []Issue, imageReoMap map[string]string, token stri
 					existingCVEsInMap := make(map[string]bool)
 
 					for _, c := range existingData {
-						key := c.CVEID + "::" + c.Package
+						key := c.CVEID + "::" + c.Package + "::" + c.DueDate
 						existingCVEsInMap[key] = true
 					}
 
 					for _, newCVE := range cves {
-						key := newCVE.CVEID + "::" + newCVE.Package
+						key := newCVE.CVEID + "::" + newCVE.Package + "::" + newCVE.DueDate
 						if !existingCVEsInMap[key] {
 							existingData = append(existingData, newCVE)
 							existingCVEsInMap[key] = true
@@ -134,6 +136,7 @@ func formatCVEsAsReadableString(data map[string][]CVEDetails) string {
 		for _, cve := range cveList {
 			sb.WriteString(fmt.Sprintf("  - CVE: %s\n", cve.CVEID))
 			sb.WriteString(fmt.Sprintf("    Package: %s\n", cve.Package))
+			sb.WriteString(fmt.Sprintf("    Due: %s\n", cve.DueDate))
 			sb.WriteString(fmt.Sprintf("    Remediation: %s\n", cve.Remediation))
 			sb.WriteString("\n")
 		}
