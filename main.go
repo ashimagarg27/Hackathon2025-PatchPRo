@@ -44,4 +44,11 @@ func main() {
 	}
 
 	SendSlackAlert(report)
+
+	if err := createTestPR(token); err != nil {
+		log.Printf("PR creation failed: %v", err)
+	} else {
+		log.Println("Test PR created successfully!")
+	}
+
 }
