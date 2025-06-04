@@ -50,5 +50,4 @@ func main() {
 	} else {
 		log.Println("Test PR created successfully!")
 	}
-
 }
