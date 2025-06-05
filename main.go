@@ -16,25 +16,29 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	token := os.Getenv("GITHUB_TOKEN")
-	if token == "" || strings.TrimSpace(token) == "" {
-		log.Fatal("GITHUB_TOKEN not set")
+	ibmToken := os.Getenv("GITHUB_IBM_TOKEN")
+	publicToken := os.Getenv("GITHUB_PUBLIC_TOKEN")
+	if ibmToken == "" || strings.TrimSpace(ibmToken) == "" {
+		log.Fatal("GITHUB_IBM_TOKEN not set")
+	}
+	if publicToken == "" || strings.TrimSpace(publicToken) == "" {
+		log.Fatal("GITHUB_PUBLIC_TOKEN not set")
 	}
 
 	// Load image-to-repo map from JSON
-	imageReoMap, err := loadImageRepoMap(JsonFileName)
+	imageRepoMap, err := loadImageRepoMap(JsonFileName)
 	if err != nil {
 		panic(err)
 	}
 
 	// Scan compliance repo to fetch issues with storage label
-	complianceIssues, err := GetIssuesWithLabel(ComplianceRepoOwner, ComplianceRepoName, StorageLabel, token)
+	complianceIssues, err := GetIssuesWithLabel(ComplianceRepoOwner, ComplianceRepoName, StorageLabel, ibmToken)
 	if err != nil {
 		log.Fatalf("Error fetching compliance issues: %v", err)
 	}
 	fmt.Printf("Number of compliance Issues with label `%s`: %v \n\n", StorageLabel, len(complianceIssues))
 
-	vulnImageCVEDataMap := getImageCVEReport(complianceIssues, imageReoMap, token)
+	vulnImageCVEDataMap := getImageCVEReport(complianceIssues, imageRepoMap, ibmToken)
 	report := formatCVEsAsReadableString(vulnImageCVEDataMap)
 	fmt.Print(report)
 
@@ -45,7 +49,7 @@ func main() {
 
 	SendSlackAlert(report)
 
-	if err := createTestPR(token); err != nil {
+	if err := createTestPR(publicToken); err != nil {
 		log.Printf("PR creation failed: %v", err)
 	} else {
 		log.Println("Test PR created successfully!")
