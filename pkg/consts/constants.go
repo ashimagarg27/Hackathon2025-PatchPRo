@@ -1,4 +1,4 @@
-package main
+package consts
 
 const (
 	ComplianceRepoOwner = "alchemy-containers"

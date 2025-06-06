@@ -1,9 +1,11 @@
-package main
+package utils
 
 import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"patchpro/github"
+	"patchpro/pkg/consts"
 	"regexp"
 	"strings"
 	"time"
@@ -15,7 +17,7 @@ type CVEDetails struct {
 	Remediation string
 }
 
-func isIssueDueWithin3Weeks(labels []Label) (bool, string) {
+func isIssueDueWithin3Weeks(labels []github.Label) (bool, string) {
 	now := time.Now()
 	threeWeeks := now.AddDate(0, 0, 21)
 
@@ -29,18 +31,6 @@ func isIssueDueWithin3Weeks(labels []Label) (bool, string) {
 		}
 	}
 	return false, ""
-}
-
-func loadImageRepoMap(filename string) (map[string]string, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var imageRepoMap map[string]string
-	err = json.NewDecoder(file).Decode(&imageRepoMap)
-	return imageRepoMap, err
 }
 
 func extractImageNameFromIssueTitle(title string) string {
@@ -73,7 +63,19 @@ func extractCVEsFromIssueComments(comment string) []CVEDetails {
 	return cves
 }
 
-func getImageCVEReport(issues []Issue, imageReoMap map[string]string, token string) map[string][]CVEDetails {
+func LoadImageRepoMap(filename string) (map[string]string, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var imageRepoMap map[string]string
+	err = json.NewDecoder(file).Decode(&imageRepoMap)
+	return imageRepoMap, err
+}
+
+func GetImageCVEReport(issues []github.Issue, imageReoMap map[string]string, token string) map[string][]CVEDetails {
 	noOfDueIssues := 0
 	noOfReqIssues := 0
 	// requiredImageIssuesMap := make(map[string][]Issue)
@@ -87,7 +89,7 @@ func getImageCVEReport(issues []Issue, imageReoMap map[string]string, token stri
 				// }
 				// requiredImageIssuesMap[image] = append(requiredImageIssuesMap[image], issue)
 
-				comments := FetchComments(ComplianceRepoOwner, ComplianceRepoName, issue.Number, token)
+				comments := github.FetchComments(consts.ComplianceRepoName, consts.ComplianceRepoName, issue.Number, token)
 				for _, comment := range comments {
 					cves := extractCVEsFromIssueComments(comment.Body)
 					if len(cves) == 0 {
@@ -127,7 +129,7 @@ func getImageCVEReport(issues []Issue, imageReoMap map[string]string, token stri
 	return vulnImageCVEDataMap
 }
 
-func formatCVEsAsReadableString(data map[string][]CVEDetails) string {
+func FormatCVEsAsReadableString(data map[string][]CVEDetails) string {
 	var sb strings.Builder
 	for image, cveList := range data {
 		sb.WriteString(fmt.Sprintf("Image: %s\n", image))
@@ -141,7 +143,7 @@ func formatCVEsAsReadableString(data map[string][]CVEDetails) string {
 	return sb.String()
 }
 
-func saveMapToJSONFile(data map[string][]CVEDetails, filename string) error {
+func SaveMapToJSONFile(data map[string][]CVEDetails, filename string) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
