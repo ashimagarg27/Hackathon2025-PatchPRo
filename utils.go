@@ -10,14 +10,19 @@ import (
 )
 
 type CVEDetails struct {
-	CVEID       string
-	Package     string
-	Remediation string
+	CVEID       string `json:"cve_id"`
+	Package     string `json:"package"`
+	Remediation string `json:"remediation"`
+}
+
+type VulnImageData struct {
+	DueDate  string
+	CVEsData []CVEDetails
 }
 
 func isIssueDueWithin3Weeks(labels []Label) (bool, string) {
 	now := time.Now()
-	threeWeeks := now.AddDate(0, 0, 21)
+	threeWeeks := now.AddDate(0, 0, 100)
 
 	for _, label := range labels {
 		if strings.HasPrefix(label.Name, "due:") {
@@ -73,13 +78,13 @@ func extractCVEsFromIssueComments(comment string) []CVEDetails {
 	return cves
 }
 
-func getImageCVEReport(issues []Issue, imageReoMap map[string]string, token string) map[string][]CVEDetails {
+func getImageCVEReport(issues []Issue, imageReoMap map[string]string, token string) map[string]VulnImageData {
 	noOfDueIssues := 0
 	noOfReqIssues := 0
 	// requiredImageIssuesMap := make(map[string][]Issue)
-	vulnImageCVEDataMap := make(map[string][]CVEDetails)
+	vulnImageCVEDataMap := make(map[string]VulnImageData)
 	for _, issue := range issues {
-		if ok, _ := isIssueDueWithin3Weeks(issue.Labels); ok {
+		if ok, dueDate := isIssueDueWithin3Weeks(issue.Labels); ok {
 			image := extractImageNameFromIssueTitle(issue.Title)
 			if _, exists := imageReoMap[image]; exists {
 				// if _, exists := requiredImageIssuesMap[image]; !exists {
@@ -95,10 +100,13 @@ func getImageCVEReport(issues []Issue, imageReoMap map[string]string, token stri
 					}
 
 					if _, exists := vulnImageCVEDataMap[image]; !exists {
-						vulnImageCVEDataMap[image] = []CVEDetails{}
+						vulnImageCVEDataMap[image] = VulnImageData{
+							DueDate:  dueDate,
+							CVEsData: []CVEDetails{},
+						}
 					}
 
-					existingData := vulnImageCVEDataMap[image]
+					existingData := vulnImageCVEDataMap[image].CVEsData
 					existingCVEsInMap := make(map[string]bool)
 
 					for _, c := range existingData {
@@ -114,7 +122,10 @@ func getImageCVEReport(issues []Issue, imageReoMap map[string]string, token stri
 						}
 					}
 
-					vulnImageCVEDataMap[image] = existingData
+					vulnImageCVEDataMap[image] = VulnImageData{
+						DueDate:  dueDate,
+						CVEsData: existingData,
+					}
 				}
 				noOfReqIssues++
 			}
@@ -127,11 +138,12 @@ func getImageCVEReport(issues []Issue, imageReoMap map[string]string, token stri
 	return vulnImageCVEDataMap
 }
 
-func formatCVEsAsReadableString(data map[string][]CVEDetails) string {
+func formatCVEsAsReadableString(data map[string]VulnImageData) string {
 	var sb strings.Builder
 	for image, cveList := range data {
 		sb.WriteString(fmt.Sprintf("Image: %s\n", image))
-		for _, cve := range cveList {
+		sb.WriteString(fmt.Sprintf("Due Date: %s\n", cveList.DueDate))
+		for _, cve := range cveList.CVEsData {
 			sb.WriteString(fmt.Sprintf("  - CVE: %s\n", cve.CVEID))
 			sb.WriteString(fmt.Sprintf("    Package: %s\n", cve.Package))
 			sb.WriteString(fmt.Sprintf("    Remediation: %s\n", cve.Remediation))
@@ -141,7 +153,7 @@ func formatCVEsAsReadableString(data map[string][]CVEDetails) string {
 	return sb.String()
 }
 
-func saveMapToJSONFile(data map[string][]CVEDetails, filename string) error {
+func saveMapToJSONFile(data map[string]VulnImageData, filename string) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
