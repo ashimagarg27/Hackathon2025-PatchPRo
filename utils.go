@@ -142,7 +142,7 @@ func formatCVEsAsReadableString(data map[string]VulnImageData) string {
 	var sb strings.Builder
 	for image, cveList := range data {
 		sb.WriteString(fmt.Sprintf("Image: %s\n", image))
-		sb.WriteString(fmt.Sprintf("  Due Date: %s\n", cveList.DueDate))
+		sb.WriteString(fmt.Sprintf("Due Date: %s\n", cveList.DueDate))
 		for _, cve := range cveList.CVEsData {
 			sb.WriteString(fmt.Sprintf("  - CVE: %s\n", cve.CVEID))
 			sb.WriteString(fmt.Sprintf("    Package: %s\n", cve.Package))
