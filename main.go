@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"sort"
@@ -13,7 +12,6 @@ import (
 	"github.com/joho/godotenv"
 	"golang.org/x/mod/semver"
 
-	"patchpro/github"
 	"patchpro/pkg/consts"
 	"patchpro/pkg/models"
 	"patchpro/pkg/worker"
@@ -43,15 +41,12 @@ func firstFixedVersion(text string) string {
 	if len(parts) == 0 {
 		return ""
 	}
-	// take the substring after the last">
 	seg := parts[len(parts)-1]
-	// tokenize on comma/space
 	tokens := strings.FieldsFunc(seg, func(r rune) bool { return r == ',' || r == ' ' })
 	if len(tokens) == 0 {
 		return ""
 	}
 	v := tokens[0]
-	// ensure it starts with "v" for semver library
 	if v != "" && v[0] != 'v' {
 		v = "v" + v
 	}
@@ -59,76 +54,88 @@ func firstFixedVersion(text string) string {
 }
 
 func main() {
-	//Load .env file
+	// Load .env file
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
-	token := os.Getenv("GITHUB_TOKEN")
-	if token == "" || strings.TrimSpace(token) == "" {
-		log.Fatal("GITHUB_TOKEN not set")
+	// Use GITHUB_IBM_TOKEN for fetching issues from the compliance repository (GitHub Enterprise)
+	ibmToken := os.Getenv("GITHUB_IBM_TOKEN")
+	if ibmToken == "" || strings.TrimSpace(ibmToken) == "" {
+		log.Fatal("GITHUB_IBM_TOKEN not set")
 	}
 
+	// Load image-to-repo mapping
 	imageRepoMap, err := utils.LoadImageRepoMap(consts.JsonFileName)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Scan compliance repo to fetch issues with storage label
-	complianceIssues, err := github.GetIssuesWithLabel(consts.ComplianceRepoOwner, consts.ComplianceRepoName, consts.StorageLabel, token)
+	// Skip fetching issues and generating cve_details.json; use the existing file
+	// issues, err := github.GetIssuesWithLabel(consts.ComplianceRepoOwner, consts.ComplianceRepoName, consts.StorageLabel, ibmToken)
+	// if err != nil {
+	// 	log.Fatalf("Error fetching compliance issues: %v", err)
+	// }
+	// fmt.Printf("Number of compliance Issues with label `%s`: %v \n\n", consts.StorageLabel, len(issues))
+
+	// Generate CVE report and save to cve_details.json
+	// vulnImageCVEDataMap := utils.GetImageCVEReport(issues, imageRepoMap, ibmToken)
+	// err = utils.SaveMapToJSONFile(vulnImageCVEDataMap, "cve_details.json")
+	// if err != nil {
+	// 	log.Fatalf("Failed to save cve_details.json: %v", err)
+	// }
+
+	// Load the CVE feed
+	feed, err := LoadRawFeed("cve_details.json")
 	if err != nil {
-		log.Fatalf("Error fetching compliance issues: %v", err)
+		log.Fatalf("Failed to load cve_details.json: %v", err)
+	}
+	if len(feed) == 0 {
+		log.Println("No CVE data found in cve_details.json")
 	}
 
-	fmt.Printf("Number of compliance Issues with label `%s`: %v \n\n", consts.StorageLabel, len(complianceIssues))
-
-	//vulnImageCVEDataMap := utils.GetImageCVEReport(complianceIssues, imageRepoMap, token)
-	//report := utils.FormatCVEsAsReadableString(vulnImageCVEDataMap)
-	//
-	//fmt.Print(report)
-	//
-	//err = utils.SaveMapToJSONFile(vulnImageCVEDataMap, "cve_details.json")
-	//if err != nil {
-	//	fmt.Println("Failed to save JSON:", err)
-	//}
-
-	feed, _ := LoadRawFeed("cve_details.json")
-
-	// 4. loop through every repo in feed
+	// Loop through every repo in feed
 	issueNum := 1000
-	for key, urlWithBranch := range imageRepoMap {
-		// we only care if the key is in the CVE feed
+	for key, repoURL := range imageRepoMap {
+		log.Printf("Processing image: %s", key)
 		if _, ok := feed[key]; !ok {
+			log.Printf("Skipping %s: not found in CVE feed", key)
 			continue
 		}
 
-		// split URL and default branch (expects .../tree/<branch>)
-		url, branch := splitURL(urlWithBranch)
-		job, err := BuildJob(feed, key, url, branch, issueNum)
+		// Declare cveFeed only if the key exists
+		cveFeed := feed[key]
+		repoURL, branch := splitURL(repoURL)
+		log.Printf("Repo URL: %s, Default Branch: %s", repoURL, branch)
+		job, err := BuildJob(cveFeed, repoURL, branch, issueNum)
 		if err != nil {
 			log.Printf("skip %s: %v", key, err)
 			continue
 		}
 		if job == nil {
-			log.Printf("%s already up‑to‑date", key)
+			log.Printf("%s already up-to-date", key)
 			continue
 		}
 
+		log.Printf("Processing job for %s with %d modules", key, len(job.Modules))
 		if err := worker.Process(context.Background(), job); err != nil {
 			log.Printf("worker failed for %s: %v", key, err)
 		} else {
+			log.Printf("Successfully processed %s", key)
 			issueNum++
 		}
 	}
 
-	slack.SendSlackAlert("report")
+	if err := slack.SendSlackAlert("report"); err != nil {
+		log.Printf("Failed to send Slack report: %v", err)
+	}
 }
 
 // toModuleFixes normalises entries for a single repo: deduplicates packages,
 // merges CVE lists, and chooses the *highest* fixed version among the
 // remediation ranges.
-func toModuleFixes(entries []models.CVEEntry) []models.ModuleFix {
+func toModuleFixes(entries []models.CVEDetails) []models.ModuleFix {
 	byPkg := map[string]*models.ModuleFix{}
 
 	for _, e := range entries {
@@ -158,18 +165,18 @@ func toModuleFixes(entries []models.CVEEntry) []models.ModuleFix {
 	return list
 }
 
-// BuildJob constructs a Job for a single repo name, using a repo→URL mapping
-// and default branch ("main" unless overridden).
-func BuildJob(raw models.RawFeed, repoName string, repoURL string, branch string, issueNum int) (*models.Job, error) {
-	entries, ok := raw[repoName]
-	if !ok {
-		return nil, fmt.Errorf("repo %s not found in feed", repoName)
+// BuildJob constructs a Job for a single repo, using the CVE feed directly.
+func BuildJob(cveFeed models.CVEFeed, repoURL, branch string, issueNum int) (*models.Job, error) {
+	mods := toModuleFixes(cveFeed.CVEsData)
+	if len(mods) == 0 {
+		return nil, nil // no fixes needed
 	}
 
-	mods := toModuleFixes(entries)
 	j := &models.Job{Modules: mods}
 	j.Repo.URL = repoURL
-	
+	// Since we're pushing directly to the same repo, UpstreamURL is the same as URL
+	j.Repo.UpstreamURL = repoURL
+
 	if branch == "" {
 		branch = "master"
 	}
@@ -192,7 +199,7 @@ func splitURL(in string) (url, branch string) {
 		branch = parts[1]
 	}
 
-	// ensure URL ends with .git for go-git clone convenience
+	// Ensure URL ends with .git for go-git clone convenience
 	if !strings.HasSuffix(url, ".git") {
 		url += ".git"
 	}

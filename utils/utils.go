@@ -83,18 +83,12 @@ func LoadImageRepoMap(filename string) (map[string]string, error) {
 func GetImageCVEReport(issues []github.Issue, imageReoMap map[string]string, token string) map[string]VulnImageData {
 	noOfDueIssues := 0
 	noOfReqIssues := 0
-	// requiredImageIssuesMap := make(map[string][]Issue)
 	vulnImageCVEDataMap := make(map[string]VulnImageData)
 	for _, issue := range issues {
 		if ok, dueDate := isIssueDueWithin3Weeks(issue.Labels); ok {
 			image := extractImageNameFromIssueTitle(issue.Title)
 			if _, exists := imageReoMap[image]; exists {
-				// if _, exists := requiredImageIssuesMap[image]; !exists {
-				// 	requiredImageIssuesMap[image] = []Issue{}
-				// }
-				// requiredImageIssuesMap[image] = append(requiredImageIssuesMap[image], issue)
-
-				comments := github.FetchComments(consts.ComplianceRepoName, consts.ComplianceRepoName, issue.Number, token)
+				comments := github.FetchComments(consts.ComplianceRepoOwner, consts.ComplianceRepoName, issue.Number, token)
 				for _, comment := range comments {
 					cves := extractCVEsFromIssueComments(comment.Body)
 					if len(cves) == 0 {
