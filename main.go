@@ -178,12 +178,12 @@ func BuildJob(cveFeed models.CVEFeed, repoURL, branch string, issueNum int) (*mo
 	j.Repo.UpstreamURL = repoURL
 
 	if branch == "" {
-		branch = "master"
+		branch = "main"
 	}
 
 	j.Repo.DefaultBranch = branch
 	j.Issue.Number = issueNum
-	j.Issue.Due = time.Now().AddDate(0, 0, 21) // three weeks out by default
+	j.Issue.Due = time.Now().AddDate(0, 0, 100) // three weeks out by default
 
 	return j, nil
 }
@@ -192,7 +192,7 @@ func splitURL(in string) (url, branch string) {
 	parts := strings.Split(in, "/tree/")
 
 	url = in
-	branch = "master"
+	branch = "main"
 
 	if len(parts) == 2 {
 		url = parts[0]

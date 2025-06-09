@@ -40,7 +40,7 @@ func Process(ctx context.Context, j *models.Job) error {
 		return fmt.Errorf("git clone: %w", err)
 	}
 
-	branch := fmt.Sprintf("cvefix/%s", time.Now().Format("2006-01-02"))
+	branch := fmt.Sprintf("patchpro/%s", time.Now().Format("2006-01-02"))
 	log.Printf("Checking out new branch: %s", branch)
 	wt, _ := repo.Worktree()
 	if err := wt.Checkout(&git.CheckoutOptions{Branch: plumbing.NewBranchReferenceName(branch), Create: true}); err != nil {
@@ -74,7 +74,11 @@ func Process(ctx context.Context, j *models.Job) error {
 		sig := &object.Signature{Name: "cve-bot", Email: "bot@example.com", When: time.Now()}
 		log.Printf("Committing changes")
 		wt.Add(".")
-		wt.Commit("chore: fix CVEs", &git.CommitOptions{Author: sig})
+		message := fmt.Sprintf("chore: fix CVEs\n\nSigned-off-by: %s <%s>", sig.Name, sig.Email)
+		_, err := wt.Commit(message, &git.CommitOptions{Author: sig})
+		if err != nil {
+			return fmt.Errorf("commit failed: %w", err)
+		}
 
 		log.Printf("Pushing to %s, Branch: %s", j.Repo.URL, branch)
 		if err := repo.Push(&git.PushOptions{Auth: auth(j.Repo.URL)}); err != nil && err != git.NoErrAlreadyUpToDate {
