@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"fmt"
 
 	"github.com/joho/godotenv"
 	"golang.org/x/mod/semver"
@@ -17,6 +18,7 @@ import (
 	"patchpro/pkg/worker"
 	"patchpro/slack"
 	"patchpro/utils"
+	"patchpro/github"
 )
 
 // LoadRawFeed reads the JSON file at path and unmarshals into RawFeed.
@@ -73,18 +75,18 @@ func main() {
 	}
 
 	// Skip fetching issues and generating cve_details.json; use the existing file
-	// issues, err := github.GetIssuesWithLabel(consts.ComplianceRepoOwner, consts.ComplianceRepoName, consts.StorageLabel, ibmToken)
-	// if err != nil {
-	// 	log.Fatalf("Error fetching compliance issues: %v", err)
-	// }
-	// fmt.Printf("Number of compliance Issues with label `%s`: %v \n\n", consts.StorageLabel, len(issues))
+	issues, err := github.GetIssuesWithLabel(consts.ComplianceRepoOwner, consts.ComplianceRepoName, consts.StorageLabel, ibmToken)
+	 if err != nil {
+	log.Fatalf("Error fetching compliance issues: %v", err)
+	}
+	fmt.Printf("Number of compliance Issues with label `%s`: %v \n\n", consts.StorageLabel, len(issues))
 
-	// Generate CVE report and save to cve_details.json
-	// vulnImageCVEDataMap := utils.GetImageCVEReport(issues, imageRepoMap, ibmToken)
-	// err = utils.SaveMapToJSONFile(vulnImageCVEDataMap, "cve_details.json")
-	// if err != nil {
-	// 	log.Fatalf("Failed to save cve_details.json: %v", err)
-	// }
+	//Generate CVE report and save to cve_details.json
+	vulnImageCVEDataMap := utils.GetImageCVEReport(issues, imageRepoMap, ibmToken)
+	err = utils.SaveMapToJSONFile(vulnImageCVEDataMap, "cve_details.json")
+	if err != nil {
+	log.Fatalf("Failed to save cve_details.json: %v", err)
+	}
 
 	// Load the CVE feed
 	feed, err := LoadRawFeed("cve_details.json")
