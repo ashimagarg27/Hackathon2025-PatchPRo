@@ -40,7 +40,7 @@ func toModuleFixes(entries []models.CVEDetails) []models.ModuleFix {
 	byPkg := map[string]*models.ModuleFix{}
 
 	for _, e := range entries {
-		fixed := firstFixedVersion(e.Remediation)
+		fixed := lastFixedVersion(e.Remediation)
 		if fixed == "" {
 			continue // malformed remediation string → skip
 		}
@@ -66,9 +66,9 @@ func toModuleFixes(entries []models.CVEDetails) []models.ModuleFix {
 	return list
 }
 
-// firstFixedVersion grabs the first token after the last ">=" and strips
+// lastFixedVersion grabs the last token after the last ">=" and strips
 // commas/spaces → returns a semver-compatible string.
-func firstFixedVersion(text string) string {
+func lastFixedVersion(text string) string {
 	parts := strings.Split(text, ">=")
 	if len(parts) == 0 {
 		return ""
@@ -78,7 +78,7 @@ func firstFixedVersion(text string) string {
 	if len(tokens) == 0 {
 		return ""
 	}
-	v := tokens[0]
+	v := tokens[len(tokens)-1]
 	if v != "" && v[0] != 'v' {
 		v = "v" + v
 	}
