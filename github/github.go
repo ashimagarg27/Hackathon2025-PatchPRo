@@ -17,42 +17,55 @@ type Comment struct {
 	Body string `json:"body"`
 }
 
-// Issue represents a GitHub issue.
 type Issue struct {
-	Number int     `json:"number"`
-	Title  string  `json:"title"`
-	Labels []Label `json:"labels"`
+	Number      int       `json:"number"`
+	Title       string    `json:"title"`
+	HTMLURL     string    `json:"html_url"`
+	PullRequest *struct{} `json:"pull_request,omitempty"`
+	Labels      []Label   `json:"labels"`
 }
 
-// GetIssuesWithLabel fetches issues from a repository with a specific label.
 func GetIssuesWithLabel(owner, repo, label, token string) ([]Issue, error) {
-	url := fmt.Sprintf("https://github.ibm.com/api/v3/repos/%s/%s/issues?labels=%s", owner, repo, label)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %v", err)
+	var allIssues []Issue
+	page := 1
+
+	for {
+		url := fmt.Sprintf("https://api.github.ibm.com/repos/%s/%s/issues?state=open&labels=%s&per_page=100&page=%d", owner, repo, label, page)
+		req, _ := http.NewRequest("GET", url, nil)
+		req.Header.Set("Authorization", "token "+token)
+		req.Header.Set("Accept", "application/vnd.github+json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != 200 {
+			body, _ := io.ReadAll(resp.Body)
+			return nil, fmt.Errorf("GitHub API error: %s\n%s", resp.Status, string(body))
+		}
+
+		var issues []Issue
+		if err := json.NewDecoder(resp.Body).Decode(&issues); err != nil {
+			return nil, err
+		}
+
+		if len(issues) == 0 {
+			break
+		}
+
+		for _, issue := range issues {
+			if issue.PullRequest == nil {
+				allIssues = append(allIssues, issue)
+			}
+		}
+
+		page++
 	}
 
-	req.Header.Set("Authorization", "token "+token)
-	req.Header.Set("Accept", "application/vnd.github+json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("request failed: %v", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("GitHub API error: %d %s\n%s", resp.StatusCode, resp.Status, body)
-	}
-
-	var issues []Issue
-	if err := json.NewDecoder(resp.Body).Decode(&issues); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %v", err)
-	}
-
-	return issues, nil
+	return allIssues, nil
 }
 
 // FetchComments fetches comments for a specific issue.
