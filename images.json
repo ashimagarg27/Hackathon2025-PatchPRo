@@ -6,6 +6,6 @@
   "ibm/ibm-storage-operator": "https://github.ibm.com/alchemy-containers/armada-storage-operator",
   "armada-master/storage-file-plugin": "https://github.ibm.com/alchemy-containers/armada-storage-file-plugin",
   "ibm/ibm-vpc-file-csi-driver": "https://github.com/IBM/ibm-vpc-file-csi-driver",
-  "armada-master/ibm-vpc-block-csi-driver": "https://github.com/kubernetes-sigs/ibm-vpc-block-csi-driver"
-  
+  "armada-master/ibm-vpc-block-csi-driver": "https://github.com/kubernetes-sigs/ibm-vpc-block-csi-driver",
+  "alchemy-containers/armada-compute-identity": "https://github.ibm.com/alchemy-containers/armada-compute-identity"
 }
